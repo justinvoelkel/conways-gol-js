@@ -31,8 +31,7 @@ function Board (x, y) {
   this.width = y
   this.cells = []
 
-  const outputBoard = () => {
-    // console.log('output state of the board to stdout')
+  this.outputBoard = () => {
     let x = 0
     let y = 0
     while (x < this.height) {
@@ -120,7 +119,6 @@ function Board (x, y) {
         }
       }
     })
-    outputBoard()
   }
 }
 
@@ -145,6 +143,7 @@ const initGame = async () => {
   while (generationCounter <= generations) {
     board.tick()
     generationCounter++
+    board.outputBoard()
   }
 }
 
