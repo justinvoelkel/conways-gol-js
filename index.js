@@ -17,7 +17,7 @@ function Cell (x, y) {
   this.y = y
   let state = cellStates.dead
 
-  this.setState = s => state = s
+  this.setState = s => (state = s)
   this.getState = () => state
 
   this.outputCellState = () => {
@@ -130,21 +130,34 @@ const askQuestion = question => {
   })
 }
 
-const initGame = async () => {
-  const height = await askQuestion('board height? ')
-  const width = await askQuestion('board width? ')
-  const generations = await askQuestion('number of generations? ')
-  rline.close()
+function Game () {
+  let board = null
+  let numOfGenerations = 0
 
-  const board = new Board(height, width)
-  board.init()
+  this.init = async () => {
+    const height = await askQuestion('board height? ')
+    const width = await askQuestion('board width? ')
+    numOfGenerations = await askQuestion('number of generations? ')
+    rline.close()
 
-  let generationCounter = 0
-  while (generationCounter <= generations) {
-    board.tick()
-    generationCounter++
-    board.outputBoard()
+    board = new Board(height, width)
+    board.init()
+  }
+
+  this.run = () => {
+    let generationCounter = 0
+    while (generationCounter <= numOfGenerations) {
+      board.tick()
+      generationCounter++
+      board.outputBoard()
+    }
   }
 }
 
-initGame()
+const run = async () => {
+  const game = new Game()
+  await game.init()
+  game.run()
+}
+
+run()
