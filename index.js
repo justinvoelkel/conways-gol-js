@@ -15,33 +15,26 @@ const cellStates = Object.freeze({
 function Cell (x, y) {
   this.x = x
   this.y = y
-  let state = cellStates.dead
-
-  this.setState = s => (state = s)
-  this.getState = () => state
-
-  this.outputCellState = () => {
-    const output = state ? figures.squareSmallFilled : ' '
-    process.stdout.write(ansiEscapes.cursorTo(this.x, this.y) + output)
-  }
+  this.state = cellStates.dead
 }
 
 function Board (x, y) {
-  this.height = x
-  this.width = y
+  this.height = y
+  this.width = x
   this.cells = []
 
   this.outputBoard = () => {
-    let x = 0
-    let y = 0
-    while (x < this.height) {
-      while (y < this.width) {
-        const cell = getCellByCoordinates(x, y)
-        cell.outputCellState()
-        y++
+    let boardPosX = 0
+    let boardPosY = 0
+    while (boardPosY < this.height) {
+      while (boardPosX < this.width) {
+        const cell = getCellByCoordinates(boardPosX, boardPosY)
+        const output = cell.state ? figures.squareSmallFilled : ' '
+        process.stdout.write(ansiEscapes.cursorTo(cell.x, cell.y) + output)
+        boardPosX++
       }
-      y = 0
-      x++
+      boardPosX = 0
+      boardPosY++
     }
   }
 
@@ -79,17 +72,17 @@ function Board (x, y) {
     // randomly seed some live cells
     const randomizer = () => Math.random() * (10 - 0) + 0
 
-    while (x < this.height) {
-      while (y < this.width) {
+    while (y < this.height) {
+      while (x < this.width) {
         const cell = new Cell(x, y)
         if (randomizer() < 3) {
-          cell.setState(cellStates.live)
+          cell.state = cellStates.live
         }
         this.cells.push(cell)
-        y++
+        x++
       }
-      y = 0
-      x++
+      x = 0
+      y++
     }
   }
 
@@ -99,23 +92,23 @@ function Board (x, y) {
     this.cells.forEach(cell => {
       const neighbors = getCellNeighbors(cell)
       const neighborStates = Object.values(neighbors)
-        .map(neighbor => neighbor ? neighbor.getState() : null)
+        .map(neighbor => neighbor ? neighbor.state : null)
       const liveNeighbors = neighborStates.reduce((acc, state) => acc + state, 0)
 
       // live rules
-      if (cell.getState()) {
+      if (cell.state) {
         if (liveNeighbors < 2 || liveNeighbors > 3) {
-          cell.setState(cellStates.dead)
+          cell.state = cellStates.dead
         }
         if (liveNeighbors === 2 || liveNeighbors === 3) {
-          cell.setState(cellStates.live)
+          cell.state = cellStates.live
         }
       }
 
       // dead rules
-      if (!cell.getState()) {
+      if (!cell.state) {
         if (liveNeighbors === 3) {
-          cell.setState(cellStates.live)
+          cell.state = cellStates.live
         }
       }
     })
